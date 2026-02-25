@@ -3,8 +3,9 @@ import faiss
 import numpy as np
 import pickle
 from typing import List, Any
+
 # from sentence_transformers import SentenceTransformer
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 from src.services.embedding import EmbeddingPipeline
 from src.settings.config import get_settings
@@ -14,28 +15,35 @@ settings = get_settings()
 
 class FaissVectorStore:
     def __init__(
-    self,
-    persist_dir: str = "faiss_store",
-    embedding_model: str = "nomic-embed-text",  # FIXED
-    chunk_size: int = 1000,
-    chunk_overlap: int = 200):
+        self,
+        persist_dir: str = "faiss_store",
+        embedding_model: str = "nomic-embed-text",  # FIXED
+        chunk_size: int = 1000,
+        chunk_overlap: int = 200,
+    ):
         self.persist_dir = persist_dir
         os.makedirs(self.persist_dir, exist_ok=True)
         self.index = None
         self.metadata = []
         self.embedding_model = embedding_model
-        self.model =  OllamaEmbeddings(model=embedding_model,base_url="http://localhost:11434")
+        self.model = OllamaEmbeddings(
+            model=embedding_model, base_url="http://localhost:11434"
+        )
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
         print(f"[INFO] Loaded embedding model: {embedding_model}")
 
     def build_from_documents(self, documents: List[Any]):
         print(f"[INFO] Building vector store from {len(documents)} raw documents...")
-        emb_pipe = EmbeddingPipeline(model_name=self.embedding_model, chunk_size=self.chunk_size, chunk_overlap=self.chunk_overlap)
+        emb_pipe = EmbeddingPipeline(
+            model_name=self.embedding_model,
+            chunk_size=self.chunk_size,
+            chunk_overlap=self.chunk_overlap,
+        )
         chunks = emb_pipe.chunk_documents(documents)
         embeddings = emb_pipe.embed_chunks(chunks)
         metadatas = [{"text": chunk.page_content} for chunk in chunks]
-        self.add_embeddings(np.array(embeddings).astype('float32'), metadatas)
+        self.add_embeddings(np.array(embeddings).astype("float32"), metadatas)
         self.save()
         print(f"[INFO] Vector store built and saved to {self.persist_dir}")
 
@@ -74,15 +82,14 @@ class FaissVectorStore:
 
     def query(self, query_text: str, top_k: int = 5):
         print(f"[INFO] Querying vector store for: '{query_text}'")
-        query_emb = np.array(
-             [self.model.embed_query(query_text)],
-             dtype=np.float32
-        )
+        query_emb = np.array([self.model.embed_query(query_text)], dtype=np.float32)
         return self.search(query_emb, top_k=top_k)
+
 
 # Example usage
 if __name__ == "__main__":
     from src.services.data_loader import load_all_documents
+
     docs = load_all_documents("data")
     store = FaissVectorStore("faiss_store")
     store.build_from_documents(docs)
