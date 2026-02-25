@@ -28,11 +28,13 @@ def main():
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.write(prompt)
-        response = send_chat_message(prompt)
-        st.session_state.messages.append(
-            {"role": "assistant", "content": response["answer"]}
-        )
+
         with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                response = send_chat_message(prompt)
+            st.session_state.messages.append(
+                {"role": "assistant", "content": response["answer"]}
+            )
             st.write(response["answer"])
 
 

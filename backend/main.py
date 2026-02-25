@@ -1,4 +1,3 @@
-from backend.src.services.advanced_search import AdvancedRAGPipeline
 from src.services.data_loader import load_all_documents
 from src.services.vector_store import FaissVectorStore
 from src.services.search import RAGSearch
