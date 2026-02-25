@@ -1,0 +1,1 @@
+from src.settings.config import get_settings
