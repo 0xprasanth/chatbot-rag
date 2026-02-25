@@ -4,12 +4,17 @@ from src.services.data_loader import load_all_documents
 from src.services.vector_store import FaissVectorStore
 from src.services.search import RAGSearch
 from src.services.rag_pipeline import RagPipeline
+from src.services.greetings import get_greeting_response
 from src.settings.config import get_settings
 
 router = APIRouter()
 settings = get_settings()
 rag_search = RAGSearch()
 rag_pipeline = RagPipeline()
+
+
+def _chat_response(answer: str, sources: list, metadata: list):
+    return {"answer": answer, "sources": sources, "metadata": metadata}
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -19,9 +24,12 @@ def health():
 
 @router.post("/chat", response_model=ChatResponse)
 def chat(req: ChatRequest):
+    greeting = get_greeting_response(req.query)
+    if greeting is not None:
+        return _chat_response(greeting, [], [])
     try:
         answer, source_chunks, metadata = rag_search.chat(req.query, req.top_k or 5)
-        return {"answer": answer, "sources": source_chunks, "metadata": metadata}
+        return _chat_response(answer, source_chunks, metadata)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
@@ -29,10 +37,13 @@ def chat(req: ChatRequest):
 
 
 @router.post("/chatv2", response_model=ChatResponse)
-def chat(req: ChatRequest):
+def chat_v2(req: ChatRequest):
+    greeting = get_greeting_response(req.query)
+    if greeting is not None:
+        return _chat_response(greeting, [], [])
     try:
         answer, source_chunks, metadata = rag_pipeline.chat(req.query, req.top_k or 5)
-        return {"answer": answer, "sources": source_chunks, "metadata": metadata}
+        return _chat_response(answer, source_chunks, metadata)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
