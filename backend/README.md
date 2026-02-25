@@ -34,7 +34,7 @@ Backend API for a **Retrieval-Augmented Generation (RAG)** chatbot. It loads doc
 - **Chat:** User query → embed → retrieve top‑k chunks → build context → LLM generates answer from context only.
 - **Two chat implementations:**  
   - `**/chat`** — `RAGSearch`: LangChain `ChatOllama` + same vector store.  
-  - `**/chatv2**` — `RagPipeline`: raw `ollama.chat()` + same vector store (different prompt/model wiring).
+  - `**/chatv2`** — `RagPipeline`: raw `ollama.chat()` + same vector store (different prompt/model wiring).
 
 Greetings and meta questions (e.g. “Hi”, “Who are you?”) are detected and answered with a fixed friendly message without calling the vector store or LLM.
 
@@ -140,7 +140,11 @@ Settings are read from the environment; a `.env` file is loaded from the repo ro
 | `HF_TOKEN`               | Hugging Face token (if needed)             | —                        |
 
 
-Allowed file extensions for upload (config) are `.pdf`, `.txt`, `.md`.
+- Allowed file extensions for upload (config) are `.pdf`, `.txt`, `.md`.
+
+## Data Ingestion:
+
+- Place your documents in `backend/data` and run ****`/ingest` 
 
 ---
 
@@ -174,10 +178,10 @@ Allowed file extensions for upload (config) are `.pdf`, `.txt`, `.md`.
 | **Greeting and meta-question handling** | Avoids unnecessary retrieval and LLM calls for “Hi”, “Who are you?”, etc. Reduces latency and cost and gives a consistent, on-brand reply. Implemented via a simple phrase/prefix check in `greetings.py`.                        |
 | **Context-only answers**                | Prompts explicitly instruct the LLM to answer only from the provided context and to say “I don’t know” (or similar) when the answer isn’t in context. Reduces hallucination and keeps answers grounded in the ingested documents. |
 | **RecursiveCharacterTextSplitter**      | LangChain’s default splitter; respects paragraph and line boundaries. Chunk size and overlap are configurable via env for different document types and embedding model limits.                                                    |
-| **Persistent vector store on disk**     | Index is built once (or via `/ingest`) and loaded on startup. No need to re-embed on every restart; rebuild only when documents change.                                                                                           ||
+| **Persistent vector store on disk**     | Index is built once (or via `/ingest`) and loaded on startup. No need to re-embed on every restart; rebuild only when documents change.                                                                                           |
 
 
---- 
+---
 
 ## API reference
 
@@ -249,29 +253,24 @@ python -m uvicorn app:app --host 0.0.0.0 --port 8000
 
 `main.py` is a standalone script (load docs, build/load store, run `RAGSearch.search_and_summarize`) and is not required to run the API.
 
-
-
 ## Ingest and vector store
 
 - **First run:** If `faiss_store/faiss.index` and `faiss_store/metadata.pkl` do not exist, `RAGSearch` and `RagPipeline` will load documents from `"data"` and build the store on startup.  
 - **Rebuild:** Call **POST /ingest** to rebuild from current `data/` contents; this overwrites the existing FAISS index and metadata.  
 - **Persistence:** The store is on disk; restarting the app loads it from `faiss_store/` and does not re-ingest unless you delete those files or run ingest again.
 
-
-
 ## Potential improvements with additional time
 
 - **Unified chat pipeline**
-    - Support switching between different LLMs to compare responses and customize output.
+  - Support switching between different LLMs to compare responses and customize output.
 - **Token usage and latency in API** 
-    - Return `input_tokens`, `output_tokens`, and `response_time_seconds` in the chat response so clients can show usage and speed; requires reading LLM response metadata (e.g. Ollama’s `prompt_eval_count` / `eval_count`) and timing the call.
+  - Return `input_tokens`, `output_tokens`, and `response_time_seconds` in the chat response so clients can show usage and speed; requires reading LLM response metadata (e.g. Ollama’s `prompt_eval_count` / `eval_count`) and timing the call.
 - **Richer source metadata in responses**
-    -  Persist and return per-chunk metadata (source file path, page number, document title) so the UI can show “Source: doc.pdf, p. 3” and support citation or deep links.
+  - Persist and return per-chunk metadata (source file path, page number, document title) so the UI can show “Source: doc.pdf, p. 3” and support citation or deep links.
 - **Document upload API**
-    -  Allow uploading PDFs via the API (within `MAX_UPLOAD_SIZE_MB` and allowed extensions), write to `data/`, then trigger ingest or incremental index update.
+  - Allow uploading PDFs via the API (within `MAX_UPLOAD_SIZE_MB` and allowed extensions), write to `data/`, then trigger ingest or incremental index update.
 - **Conversation history**
-    -  Keep a short conversation window (e.g. last N turns) and pass it to the LLM for follow-up questions; optional chat/session ID for multi-user.
-
+  - Keep a short conversation window (e.g. last N turns) and pass it to the LLM for follow-up questions; optional chat/session ID for multi-user.
 - **Evaluation and monitoring**
-    -  Add a small set of example queries and expected behavior (or manual labels) to track retrieval quality and answer relevance over time; optional logging to LangSmith or similar.
+  - Add a small set of example queries and expected behavior (or manual labels) to track retrieval quality and answer relevance over time; optional logging to LangSmith or similar.
 
