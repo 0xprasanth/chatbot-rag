@@ -140,7 +140,7 @@ Settings are read from the environment; a `.env` file is loaded from the repo ro
 | `HF_TOKEN`               | Hugging Face token (if needed)             | —                        |
 
 
-- Allowed file extensions for upload (config) are `.pdf`, `.txt`, `.md`.
+- Allowed file extensions for upload (config) are `.pdf`, `.txt`, `.csv`.
 
 ## Data Ingestion:
 

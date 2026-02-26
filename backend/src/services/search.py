@@ -58,7 +58,9 @@ class RAGSearch:
         response = self.llm.invoke([prompt])
         return response.content
 
-    def retrieve_context(self, query: str, top_k: int = 5) -> tuple[str, List[str], List[dict]]:
+    def retrieve_context(
+        self, query: str, top_k: int = 5
+    ) -> tuple[str, List[str], List[dict]]:
         results = self.vectorstore.query(query, top_k=top_k)
         texts = [r["metadata"].get("text", "") for r in results if r["metadata"]]
         metadatas = [r.get("metadata", {}) for r in results]
@@ -79,11 +81,12 @@ class RAGSearch:
 
                 Answer the question using the context above. If the context does not contain enough information to answer, then say "I don't have information about that"."""
         response = self.llm.invoke([("user", user_prompt)])
-        print("Response:", response)
+        print("[DEBUG] Response:", response.to_json())
         return response.content
 
     def chat(self, query: str, top_k: int = 5) -> tuple[str, List[str], List[dict]]:
         context, source_chunks, metadatas = self.retrieve_context(query, top_k)
+        print("[DEBUG] Context:", context[:50])
         answer = self.generate_response(query, context)
         return answer, source_chunks, metadatas
 
