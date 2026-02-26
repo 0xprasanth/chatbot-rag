@@ -1,11 +1,20 @@
 import asyncio
 import os
+from pathlib import Path
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from src.api.routes import ingest, router
 
+DATA_DIR = "data"
 FAISS_STORE = "faiss_store"
+
+
+def _has_pdf_data() -> bool:
+    data_path = Path(DATA_DIR).resolve()
+    if not data_path.is_dir():
+        return False
+    return bool(list(data_path.glob("**/*.pdf")))
 
 
 def _faiss_store_ready() -> bool:
@@ -16,6 +25,10 @@ def _faiss_store_ready() -> bool:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    if not _has_pdf_data():
+        raise RuntimeError(
+            "Cannot start: data directory is empty or contains no PDFs. For now only PDF is supported."
+        )
     if not _faiss_store_ready():
         await asyncio.to_thread(ingest)
     yield
