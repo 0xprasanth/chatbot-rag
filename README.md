@@ -4,9 +4,15 @@
   <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff"/>
   <img src="https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white"/>
   <img src="https://img.shields.io/badge/Ollama-fff?logo=ollama&logoColor=000"/>
+
+<a href="https://www.youtube.com/watch?v=Rndp5DzGBZQ" target="_blank">
+  <img src="https://img.shields.io/badge/YouTube-%23FF0000.svg?logo=YouTube&logoColor=white"/>
+</a>
+
+
 </p>
 
-A complete **Retrieval-Augmented Generation (RAG) chatbot** built with FastAPI, FAISS, Ollama, and Streamlit. The system ingests documents, builds a semantic vector index, retrieves relevant content for user queries, and generates grounded responses using a local LLM.
+A complete **Retrieval-Augmented Generation (RAG) chatbot** built with FastAPI, FAISS, Ollama, and Streamlit. The system ingests documents, builds a semantic vector index, retrieves relevant content for user queries, and generates grounded responses using a local LLM. Have a look at the [video demo here](https://www.youtube.com/watch?v=Rndp5DzGBZQ)
 
 This repository contains:
 
@@ -553,3 +559,5 @@ Benefits:
 - Complete documentation
 - Extensible modular architecture
 
+# Bonus
+- Video Demo - [youtube](https://www.youtube.com/watch?v=Rndp5DzGBZQ)
