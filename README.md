@@ -1,9 +1,10 @@
 # Domain-Specific RAG Chatbot Application
 
-[Python](#)
-[FastAPI](#)
-[Ollama](#)
-
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?logo=python&logoColor=fff"/>
+  <img src="https://img.shields.io/badge/FastAPI-009485.svg?logo=fastapi&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Ollama-fff?logo=ollama&logoColor=000"/>
+</p>
 A complete **Retrieval-Augmented Generation (RAG) chatbot** built with FastAPI, FAISS, Ollama, and Streamlit. The system ingests documents, builds a semantic vector index, retrieves relevant content for user queries, and generates grounded responses using a local LLM.
 
 This repository contains:
